@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ToDo List</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <h1 class="text-3xl font-semibold mb-4">ToDo List</h1>
+    <div class="w-full max-w-xs">
+        <input type="text" id="myInput" placeholder="Add a task" class="w-full px-4 py-2 mb-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        <button id="addTask" class="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 mb-2">
+            Add
+        </button>
+    </div>
+
+    <div class="mt-6 w-full max-w-xs sm:max-w-md md:max-w-lg bg-white p-4 rounded-lg shadow-md">
+        <ul id="todo-list">
+            <!-- Ari ma list ang mga TASKS -->
+        </ul>
+    </div>
+    
+    <a href="logout.php" class="mt-4 block text-center border border-red-500 px-4 py-3 rounded-lg text-red-500 hover:underline hover:bg-red-100">Logout</a>
+
+    <div class="fixed object-center w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto mt-8">
+        <div id="updateTaskContainer" class="p-6 rounded-lg">
+            <form id="updateTaskForm" style="display: none" class="bg-white">
+                <input type="text" id="updatedTaskText" name="updatedTaskText" placeholder="Updated task text" class="w-full px-4 py-4 mb-4 border rounded-lg focus:outline-none focus:border-blue-400 text-lg" />
+                <button id="updateTaskButton" class="w-full bg-blue-500 text-white font-semibold py-4 px-6 rounded-lg hover:bg-blue-600 mb-4 text-lg">
+                    Save
+                </button>
+                <button id="cancelUpdate" class="w-full bg-red-500 text-white font-semibold py-4 px-6 rounded-lg hover-bg-red-600 text-lg">
+                    Cancel
+                </button>
+            </form>
+        </div>
+    </div>
+    
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const taskInput = $('#myInput'); 
+            const todoList = $('#todo-list');
+            const updateTaskForm = $('#updateTaskForm');
+            const updatedTaskText = $('#updatedTaskText');
+
+            let taskToUpdateId = null;
+
+            function getTasks() {
+    $.ajax({
+        url: 'todo.php',
+        type: 'GET',
+        xhrFields: { withCredentials: true },
+        success: function (tasks) {
+            todoList.empty();
+
+            if (Array.isArray(tasks) || tasks.length > 0) {
+                const tasksArray = Array.isArray(tasks) ? tasks : Array.from(tasks);
+                tasksArray.forEach((task, index) => {
+                    const taskItem = $(`
+                        <li class="mb-4 p-4 bg-blue-100 text-blue-800 rounded-lg border-2 border-blue-400 ">
+                            ${task.text}
+                        </li>
+                    `);
+                    const buttonContainer = $('<div class="flex space-x-4 mt-2"></div>');
+
+                    const updateButton = $(
+                        '<button class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600">Update</button>'
+                    );
+                    updateButton.click(function () {
+                        showUpdateForm(task.id, task.text);
+                    });
+
+                    const deleteButton = $(
+                        '<button class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600">Delete</button>'
+                    );
+                    deleteButton.click(function () {
+                        deleteTask(task.id);
+                    });
+
+                    buttonContainer.append(updateButton, deleteButton);
+                    taskItem.append(buttonContainer);
+                    todoList.append(taskItem);
+                });
+            } else {
+                console.log('No tasks found.');
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.error('AJAX Error:', textStatus, errorThrown);
+            console.log('Error fetching tasks.');
+        },
+    });
+}
+
+
+            function showUpdateForm(taskId, currentText) {
+                taskToUpdateId = taskId;
+                updatedTaskText.val(currentText);
+                updateTaskForm.show();
+            }
+
+            function hideUpdateForm() {
+                taskToUpdateId = null;
+                updatedTaskText.val('');
+                updateTaskForm.hide();
+            }
+
+            $('#addTask').click(addTask);
+
+            updateTaskForm.submit(function(event) {
+                event.preventDefault();
+                const newText = updatedTaskText.val().trim();
+                if (newText !== '') {
+                    updateTaskText(taskToUpdateId, newText);
+                    hideUpdateForm();
+                }
+            });
+
+            $('#cancelUpdate').click(function() {
+                hideUpdateForm();
+            });
+
+            function addTask() {
+                const text = taskInput.val().trim();
+                if (text === '') return;
+                $.post('todo.php', { text }, function() {
+                    taskInput.val('');
+                    getTasks();
+                });
+            }
+
+            function updateTaskText(id, newText) {
+                $.ajax({
+                    url: 'todo.php',
+                    type: 'PUT',
+                    data: { id, text: newText },
+                    success: function() {
+                        getTasks();
+                    }
+                });
+            }
+
+            function deleteTask(id) {
+                $.ajax({
+                    url: 'todo.php?id=' + id,
+                    type: 'DELETE',
+                    success: function() {
+                        getTasks();
+                    }
+                });
+            }
+
+            getTasks();
+        });
+    </script>
+</body>
+</html>

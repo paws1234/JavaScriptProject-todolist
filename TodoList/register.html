@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-md animate-fade-in-down">
+        <h2 class="text-2xl font-semibold mb-4">Registration</h2>
+        <input type="text" id="register-username" placeholder="Username" class="block w-full px-4 py-2 mb-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        <input type="email" id="register-email" placeholder="Email" class="block w-full px-4 py-2 mb-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        <input type="password" id="register-password" placeholder="Password" class="block w-full px-4 py-2 mb-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        <button id="register-button" class="block w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transform hover:scale-105 transition duration-300">Register</button>
+        <p id="register-message" class="text-red-600 mt-2"></p>
+        <a href="login.html" class="block text-center mt-4 text-blue-500 hover:underline animate-bounce">Login</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="register.js"></script>
+</body>
+</html>
